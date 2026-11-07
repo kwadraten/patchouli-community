@@ -23,6 +23,7 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
+          cache-dependency-path: scripts/requirements-sign.txt
       - run: python -m pip install -r scripts/requirements-sign.txt
       - run: python scripts/build_index.py --sign
         env:
