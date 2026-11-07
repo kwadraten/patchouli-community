@@ -2,11 +2,13 @@
 import argparse
 import base64
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
 import shutil
 import tomllib
+import zipfile
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -47,6 +49,23 @@ def source_manifest(repository, revision):
     return tomllib.loads(content.decode("utf-8"))
 
 
+def verify_package(content, source, plugin_id):
+    with zipfile.ZipFile(io.BytesIO(content)) as package:
+        names = {name for name in package.namelist() if not name.endswith("/")}
+        if "patchouli-plugin.toml" not in names:
+            raise ValueError(f"Package manifest is missing for {plugin_id}")
+        manifest = tomllib.loads(package.read("patchouli-plugin.toml").decode("utf-8"))
+        if manifest != source:
+            raise ValueError(f"Package and pinned-source manifests differ for {plugin_id}")
+        assets = [manifest["readme"]]
+        assets += [node["schema"] for node in manifest["vfs"]["nodes"] if "schema" in node]
+        assets += [message[key] for endpoint in manifest["vfs"].get("endpoints", [])
+                   for message in endpoint["messages"] for key in ("input_schema", "result_schema")]
+        missing = [name for name in assets if name not in names]
+        if missing:
+            raise ValueError(f"Package declaration assets are missing for {plugin_id}: {missing}")
+
+
 def plugin_entry(path):
     with path.open("rb") as handle:
         index = tomllib.load(handle)
@@ -80,7 +99,8 @@ def plugin_entry(path):
         if platform not in PLATFORMS or platform in platforms:
             raise ValueError(f"Invalid or duplicate platform {platform} for {plugin_id}")
         platforms.add(platform)
-        _, size, sha256 = download(artifact["url"])
+        content, size, sha256 = download(artifact["url"])
+        verify_package(content, manifest, plugin_id)
         if size != artifact["size"] or sha256 != artifact["sha256"].lower():
             raise ValueError(f"Artifact size/SHA-256 mismatch for {plugin_id} {platform}")
         artifacts.append({
