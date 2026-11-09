@@ -16,7 +16,7 @@ from urllib.request import Request, urlopen
 SCHEMA = "patchouli.community.index/1"
 MAX_ARTIFACT_BYTES = 512 * 1024 * 1024
 PLATFORMS = {"win-x64", "win-arm64", "osx-x64", "osx-arm64", "linux-x64", "linux-arm64"}
-VERBS = {"find", "fetch", "send"}
+VERBS = {"find", "fetch", "send", "view"}
 
 
 def download(url, maximum=MAX_ARTIFACT_BYTES):
@@ -89,6 +89,8 @@ def plugin_entry(path):
     verbs = {verb for node in manifest.get("vfs", {}).get("nodes", []) for verb in node["verbs"]}
     if manifest.get("vfs", {}).get("endpoints"):
         verbs.add("send")
+    if manifest.get("ui", {}).get("views"):
+        verbs.add("view")
     if not verbs or not verbs <= VERBS:
         raise ValueError(f"Unsupported requested verbs for {plugin_id}: {verbs}")
 
