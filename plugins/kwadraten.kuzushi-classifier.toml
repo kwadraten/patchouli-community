@@ -1,9 +1,9 @@
 id = "kwadraten.kuzushi-classifier"
 repository = "https://github.com/kwadraten/kuzushi-classifier-app"
-source_revision = "302beb2be2a08065d8a7bb9d6264ef50b08217ff"
+source_revision = "07821db36905e90977f7025347c1b04a81888f2c"
 
 [[artifacts]]
 platform = "win-x64"
-url = "https://github.com/kwadraten/kuzushi-classifier-app/releases/download/0.3.1/kwadraten.kuzushi-classifier-0.3.1-win-x64.zip"
-size = 51739019
-sha256 = "79027c1fc0d42f9fce7decf0f4b62fd4fd34b2ec0a400e1f54fe1d9d21b0c22a"
+url = "https://github.com/kwadraten/kuzushi-classifier-app/releases/download/0.4.0/kwadraten.kuzushi-classifier-0.4.0-win-x64.zip"
+size = 50113611
+sha256 = "374be9a92e02e9691dc81d13c936b60d361ad96a64ebc9f7557b1b48e9b49c31"
