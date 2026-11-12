@@ -1,6 +1,23 @@
 # Patchouli Community
 
-Patchouli 社区扩展与独立插件的受审索引。插件作者维护自己的源码和 release；本仓库只保存索引、固定源码修订、发行产物大小与 SHA-256，不复制插件源码。
+Patchouli 社区扩展与独立插件的受审索引。非内置 Extension 的源码直接提交到本仓库 `extensions/{id}/` 审查；插件作者维护自己的源码和 release，`plugins/{id}.toml` 只保存索引、固定源码修订、发行产物大小与 SHA-256，不复制插件源码。
+
+## 扩展包
+
+每个扩展对应 `extensions/{id}/`，目录内容即随包源码：`main.fsx`（必需）与可选的辅助 `.fsx`、`lib/`、资源文件。`main.fsx` 在顶层 `let extension` 前的 `///` XML 文档声明包身份：
+
+```fsharp
+/// <summary>一句话说明。</summary>
+/// <patchouli-extension id="{id}" kind="metadata" version="1.0.0" host-api="patchouli.extensions/4">
+///   <name>显示名</name>
+/// </patchouli-extension>
+let extension = ...
+```
+
+- `id` 必须与目录名一致（`[A-Za-z0-9][A-Za-z0-9._-]{0,63}`），且不得使用 `metadata.`、`translation.`、`ocr.`、`pdf-text.`、`layout.` 等内置前缀。
+- `kind` ∈ `translation|metadata|ocr|retrieval|pdf-text-layer|layout-recognition`；`version` 为严格 SemVer；`host-api` ∈ `patchouli.extensions/3|/4`；恰好一个 `<name>`，允许 `<summary>`/`<remarks>`，文档根节点需恰好一个 `<summary>`。
+- 包内只允许常规文件：`#load` / `#r` 的相对路径引用必须在包内解析得到；`extension.yml`、`patchouli-plugin.toml`、`config.json`、`extension-state.json`、`.generations/`、`.lkg/`、`.compiled/` 为宿主保留名，不得提交。
+- CI 把每个包打成确定性 zip 发布到 `extensions/{id}/{version}/package.zip`，并在索引中钉住其大小、SHA-256 与最后修改该包的 commit。
 
 ## 插件索引
 
